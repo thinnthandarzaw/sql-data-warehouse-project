@@ -1,12 +1,3 @@
-USE DataWarehouse;
-SELECT * FROM bronze.crm_cust_info;
-SELECT * FROM bronze.crm_prd_info;
-SELECT * FROM bronze.crm_sales_details;
-SELECT * FROM bronze.erp_cust_az12;
-SELECT * FROM bronze.erp_px_cat_g1v2;
-SELECT * FROM bronze.erp_loc_a101;
-
-
     SELECT * FROM bronze.crm_sales_details
     WHERE sls_ord_num != TRIM(sls_ord_num) OR sls_ord_num IS NULL;
 
@@ -72,6 +63,7 @@ SELECT * FROM bronze.erp_loc_a101;
     END sls_price
     FROM bronze.crm_sales_details;
 
+-- complete version --
     INSERT INTO silver.crm_sales_details (
     sls_ord_num,
     sls_prd_key,
@@ -98,13 +90,11 @@ SELECT * FROM bronze.erp_loc_a101;
         ELSE CAST(CAST(sls_due_dt AS VARCHAR) AS DATE)
     END sls_due_dt,
     CASE 
-    --sales data is incorrect --
         WHEN sls_sales <= 0 OR sls_sales IS NULL OR sls_sales != sls_quantity * ABS(sls_price) THEN sls_quantity * ABS(sls_price)
         ELSE sls_sales
     END sls_sales,
     sls_quantity,
     CASE 
-    --price data is incorrect --
         WHEN sls_price <= 0 OR sls_price IS NULL THEN sls_sales / NULLIF(sls_quantity,0)
         ELSE sls_price
     END sls_price
@@ -114,5 +104,6 @@ SELECT * FROM bronze.erp_loc_a101;
     -- check invalid date order_dt> due_dt or order_dt > ship_dt
     SELECT *  FROM silver.crm_sales_details
     WHERE sls_order_dt> sls_due_dt OR sls_order_dt > sls_ship_dt;
+
 
 SELECT * FROM silver.crm_sales_details;
